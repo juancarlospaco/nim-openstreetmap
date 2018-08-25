@@ -32,3 +32,4 @@ echo OSM(timeout: 5).capabilities()  # Check the Docs for more API Calls.
 - The order of the procs follows the order on the OSM Wiki.
 - The naming of the procs follows the naming on the OSM Wiki.
 - The errors on the procs follows the errors on the OSM Wiki.
+- [Not Supported API call.](https://wiki.openstreetmap.org/wiki/API_v0.6#Redaction:_POST_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id.2F.23version.2Fredact.3Fredaction.3D.23redaction_id)
