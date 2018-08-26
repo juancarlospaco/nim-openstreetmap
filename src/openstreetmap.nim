@@ -11,16 +11,14 @@
 ## - The errors on the procs follows the errors on the OSM Wiki.
 ## - 1 Not Supported API call: https://wiki.openstreetmap.org/wiki/API_v0.6#Redaction:_POST_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id.2F.23version.2Fredact.3Fredaction.3D.23redaction_id
 
-import
-  asyncdispatch, json, httpclient, strformat, strutils, times, math, xmldomparser,
-  xmldom, uri, httpcore, base64
+import asyncdispatch, httpclient, strformat, strutils, xmldomparser, xmldom, uri, httpcore, base64
 
 const
   osm_api_semver* = 0.6  ## OpenStreetMap API Version.
   api_url* = "https://api.openstreetmap.org/api/0.6/"             ## OpenStreetMap HTTPS API URL for Production.
   api_dev* = "https://master.apis.dev.openstreetmap.org/api/0.6/" ## OpenStreetMap HTTPS API URL for Development.
-  max_str_len* = 255  ## API limits length of all key & value strings to a maximum of 255 characters.
-  err_msg_len = "OpenStreetMap API limits length of all key & value strings to a maximum of 255 characters."
+  max_str_len = 255  ## API limits length of all key & value strings to a maximum of 255 characters.
+  err_msg_len = "OpenStreetMap API limits the length of all key and value strings to a maximum of 255 characters."
   err_msg_ele = "OpenStreetMap API elements must be one of 'node' or 'way' or 'relation'."
 
 type
@@ -41,10 +39,10 @@ proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body
   let basic_auth = base64.encode(this.username.strip & ":" & this.password.strip)
   client.headers["Authorization"] = "Basic " & basic_auth
   client.headers["DNT"] = "1"  # DoNotTrack.
-  let resp =
+  let responses =
     when this is AsyncOSM: await client.request(url=api_url & endpoint, httpMethod=http_method, body=body)
     else: client.request(url=api_url & endpoint, httpMethod=http_method, body=body)
-  result = loadXML(await resp.body)
+  result = loadXML(await responses.body)
 
 
 # API Calls -> Miscellaneous.
@@ -62,6 +60,7 @@ proc get_bounding_box*(this: OSM | AsyncOSM, left, bottom, right, top: float): F
   result = await osm_http_request(this, endpoint=fmt"map?bbox={left},{bottom},{right},{top}", http_method="GET")
 
 proc get_permissions*(this: OSM | AsyncOSM): Future[PDocument] {.multisync.} =
+  ## https://wiki.openstreetmap.org/wiki/API_v0.6#Retrieving_permissions:_GET_.2Fapi.2F0.6.2Fpermissions
   result = await osm_http_request(this, endpoint="permissions", http_method="GET")
 
 
@@ -166,7 +165,7 @@ proc delete_nodewayrelation(this: OSM | AsyncOSM, element: string, id: int): Fut
   result = await osm_http_request(this, endpoint=fmt"{element}/{id}", http_method="DELETE")
 
 proc get_nodewayrelation_history*(this: OSM | AsyncOSM, element: string, id: int): Future[PDocument] {.multisync.} =
-  ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
+  ## https://wiki.openstreetmap.org/wiki/API_v0.6#History:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id.2Fhistory
   assert element in ["node", "way", "relation"], err_msg_ele
   result = await osm_http_request(this, endpoint=fmt"{element}/{id}/history", http_method="GET")
 
