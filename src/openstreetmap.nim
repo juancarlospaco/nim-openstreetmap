@@ -198,7 +198,7 @@ proc get_wayrelation_full*(this: OSM | AsyncOSM, element: string, id: int): Futu
 # API Calls -> GPS Traces.
 
 
-proc get_trackpoints*(this: OSM | AsyncOSM, left, bottom, right, top, pageNumber: int): Future[PDocument] {.multisync.} =
+proc get_trackpoints*(this: OSM | AsyncOSM, left, bottom, right, top: float, pageNumber: int): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   result = await osm_http_request(this, endpoint=fmt"trackpoints?bbox={left},{bottom},{right},{top}&page={pageNumber}", http_method="GET")
 
@@ -260,7 +260,7 @@ proc put_user_preferences*(this: OSM | AsyncOSM, your_key, value: string): Futur
 # API Calls -> Map Notes.
 
 
-proc get_notes*(this: OSM | AsyncOSM, left, bottom, right, top: int, limit: range[1..10000] = 100, closed: int8 = 7): Future[PDocument] {.multisync.} =
+proc get_notes*(this: OSM | AsyncOSM, left, bottom, right, top: float, limit: range[1..10000] = 100, closed: int8 = 7): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   result = await osm_http_request(this, endpoint=fmt"/notes?bbox={left},{bottom},{right},{top}&limit={limit}&closed={closed}", http_method="GET")
 
@@ -295,13 +295,24 @@ proc get_notes_search*(this: OSM | AsyncOSM, q: string, limit: range[1..10000] =
 
 when is_main_module:
   # Sync client.
-  #var osm_client = OSM(timeout: 9, username: "test", password: "test")
-  #echo $osm_client.get_capabilities()
-  #echo $osm_client.get_bounding_box(90.0, -90.0, 90.0, -90.0)
-  #echo $osm_client.get_permissions()
-  #echo $osm_client.get_changeset(61972594)
-  #echo $osm_client.put_changeset_close(61972594)  # Fails as expected.
-  #echo $osm_client.get_changeset_download(61972594)
+  let osm_client = OSM(timeout: 9, username: "test", password: "test")
+  echo $osm_client.get_capabilities()
+  echo $osm_client.get_bounding_box(90.0, -90.0, 90.0, -90.0)
+  echo $osm_client.get_permissions()
+  echo $osm_client.get_changeset(61972594)
+  echo $osm_client.get_changeset_download(61972594)
+  echo $osm_client.get_changesets_bbox(90.0, -90.0, 90.0, -90.0)
+  echo $osm_client.get_changesets_open(true)
+  echo $osm_client.get_changesets_cid(@[61972594])
+  echo $osm_client.get_trackpoints(90.0, -90.0, 90.0, -90.0, 1)
+  echo $osm_client.get_notes(90.0, -90.0, 90.0, -90.0, limit=2)
+  echo $osm_client.get_notes_search(q="Argentina", limit=2)
+
   # Async client.
-  var aosm_client = AsyncOSM(timeout: 9, username: "test", password: "test")
-  echo $aosm_client.get_capabilities()
+  proc test {.async.} =
+    let
+      osm_client = AsyncOSM(timeout: 9, username: "test", password: "test")
+      async_resp = await osm_client.get_capabilities()
+    echo $async_resp
+
+  waitFor(test())
