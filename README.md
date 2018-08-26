@@ -55,6 +55,7 @@ waitFor(test())
 - API Calls that use HTTP `PUT` start with `put_*`.
 - API Calls that use HTTP `DELETE` start with `delete_*`.
 - API Calls use [the DoNotTrack HTTP Header.](https://en.wikipedia.org/wiki/Do_Not_Track)
+- The `timeout` argument is on Seconds.
 - Run the module itself for an Example.
 
 
