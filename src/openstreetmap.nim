@@ -100,7 +100,7 @@ proc get_changesets_user*(this: OSM | AsyncOSM, user: string): Future[PDocument]
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Query:_GET_.2Fapi.2F0.6.2Fchangesets
   result = await osm_http_request(this, endpoint=fmt"changesets?user={user}", http_method="GET")
 
-proc get_changesets_display_name*(this: OSM | AsyncOSM, display_name: string, api_url = api_url): Future[PDocument] {.multisync.} =
+proc get_changesets_display_name*(this: OSM | AsyncOSM, display_name: string): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Query:_GET_.2Fapi.2F0.6.2Fchangesets
   result = await osm_http_request(this, endpoint=fmt"changesets?display_name={display_name}", http_method="GET")
 
@@ -110,12 +110,12 @@ proc get_changesets_time*(this: OSM | AsyncOSM, time1, time2: string): Future[PD
   let t2 = if time2 == "": "" else: "," & time2
   result = await osm_http_request(this, endpoint=fmt"changesets?time={time1}{t2}", http_method="GET")
 
-proc get_changesets_open*(this: OSM | AsyncOSM, open: bool, api_url = api_url): Future[PDocument] {.multisync.} =
+proc get_changesets_open*(this: OSM | AsyncOSM, open: bool): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Query:_GET_.2Fapi.2F0.6.2Fchangesets
   let a = if open: "open=true" else: "closed=true"
   result = await osm_http_request(this, endpoint=fmt"changesets?{a}", http_method="GET")
 
-proc get_changesets_cid*(this: OSM | AsyncOSM, cid: seq[int], api_url = api_url): Future[PDocument] {.multisync.} =
+proc get_changesets_cid*(this: OSM | AsyncOSM, cid: seq[int]): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Query:_GET_.2Fapi.2F0.6.2Fchangesets
   let a = cid.join(",")
   result = await osm_http_request(this, endpoint=fmt"changesets?{a}", http_method="GET")
@@ -253,7 +253,7 @@ proc get_user_preferences*(this: OSM | AsyncOSM): Future[PDocument] {.multisync.
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   result = await osm_http_request(this, endpoint="user/preferences", http_method="GET")
 
-proc put_user_preferences*(this: OSM | AsyncOSM, your_key, value: string, api_url = api_url): Future[PDocument] {.multisync.} =
+proc put_user_preferences*(this: OSM | AsyncOSM, your_key, value: string): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   result = await osm_http_request(this, endpoint=fmt"user/preferences/{your_key}", http_method="PUT", body = value)
 
@@ -289,7 +289,7 @@ proc post_notes_reopen*(this: OSM | AsyncOSM, id: int, text: string): Future[PDo
   assert len(text) < max_str_len, err_msg_len
   result = await osm_http_request(this, endpoint=fmt"notes/{id}/comment?text={encodeUrl(text.strip)}", http_method="POST")
 
-proc get_notes_search*(this: OSM | AsyncOSM, q: string, limit: range[1..10000] = 100, closed: int8 = 7, api_url = api_url): Future[PDocument] {.multisync.} =
+proc get_notes_search*(this: OSM | AsyncOSM, q: string, limit: range[1..10000] = 100, closed: int8 = 7): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   result = await osm_http_request(this, endpoint=fmt"notes/search?q={q}&limit={limit}&closed={closed}", http_method="GET")
 
