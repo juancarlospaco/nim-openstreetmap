@@ -28,7 +28,7 @@
 import asyncdispatch, httpclient, strformat, strutils, xmldomparser, xmldom, uri, httpcore, base64
 
 const
-  osm_api_semver* = 0.6                                           ## OpenStreetMap API Version.
+  osm_api_version* = 0.6                                          ## OpenStreetMap API Version.
   api_url* = "https://api.openstreetmap.org/api/0.6/"             ## OpenStreetMap HTTPS API URL for Production.
   api_dev* = "https://master.apis.dev.openstreetmap.org/api/0.6/" ## OpenStreetMap HTTPS API URL for Development.
   max_str_len = 255  ## API limits length of all key & value strings to a maximum of 255 characters.
@@ -42,7 +42,7 @@ type
   OSM* = OpenStreetMapBase[HttpClient]           ## OpenStreetMap  Sync Client.
   AsyncOSM* = OpenStreetMapBase[AsyncHttpClient] ## OpenStreetMap Async Client.
 
-proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body = ""): Future[PDocument] {.multisync.} =
+proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body = "", api_url=api_url): Future[PDocument] {.multisync.} =
   ## Base function for all OpenStreetMap HTTPS API Calls.
   assert http_method in ["GET", "POST", "PUT", "DELETE"], "HTTP Method must be a string of one of 'GET' or 'POST' or 'PUT' or 'DELETE'."
   assert endpoint.strip.len > 4, "Invalid OpenStreetMap HTTPS API Endpoint."
