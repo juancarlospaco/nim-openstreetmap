@@ -317,4 +317,4 @@ when is_main_module:
       async_resp = await osm_client.get_capabilities()
     echo $async_resp
 
-  waitFor(test())
+  waitFor test()
