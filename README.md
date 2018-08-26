@@ -50,6 +50,7 @@ waitFor(test())
 - The order of the procs follows the order on the OSM Wiki.
 - The naming of the procs follows the naming on the OSM Wiki.
 - The errors on the procs follows the errors on the OSM Wiki.
+- The `limit` key is `limit: range[1..10000] = 100` as documented on the OSM Wiki.
 - API Calls that use HTTP `GET` start with `get_*`.
 - API Calls that use HTTP `POST` start with `post_*`.
 - API Calls that use HTTP `PUT` start with `put_*`.
