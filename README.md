@@ -22,7 +22,7 @@ echo $osm_client.get_notes_search(q="Argentina", limit=9)
 
 # API
 
-- [Check the OpenStreetMap Wiki](https://wiki.openstreetmap.org/wiki/API_v0.6), since the Lib is a 1:1 copy of the official Docs.
+- [Check the OpenStreetMap Wiki](https://wiki.openstreetmap.org/wiki/API_v0.6), the Lib is a 1:1 copy of the official Docs.
 - This Library uses API Version `0.6` from Year `2018`.
 - Each proc links to the official OSM API docs.
 - All procs should return an XML Object `PDocument`.
@@ -77,6 +77,10 @@ No.
 - Can I use the OpenStreetMap data ?.
 
 Yes. [**You MUST give Credit to OpenStreetMap Contributors!.**](https://wiki.openstreetmap.org/wiki/Legal_FAQ#3a._I_would_like_to_use_OpenStreetMap_maps._How_should_I_credit_you.3F)
+
+- Can I use a Sandbox fake server for testing purposes ?.
+
+Yes. Its on the `api_dev` const on the source code.
 
 
 # Requisites
