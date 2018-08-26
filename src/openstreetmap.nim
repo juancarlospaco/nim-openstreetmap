@@ -9,7 +9,21 @@
 ## - The order of the procs follows the order on the OSM Wiki.
 ## - The naming of the procs follows the naming on the OSM Wiki.
 ## - The errors on the procs follows the errors on the OSM Wiki.
-## - 1 Not Supported API call: https://wiki.openstreetmap.org/wiki/API_v0.6#Redaction:_POST_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id.2F.23version.2Fredact.3Fredaction.3D.23redaction_id
+## - API Calls that use HTTP `GET` start with `get_*`.
+## - API Calls that use HTTP `POST` start with `post_*`.
+## - API Calls that use HTTP `PUT` start with `put_*`.
+## - API Calls that use HTTP `DELETE` start with `delete_*`.
+## - API Calls use [the DoNotTrack HTTP Header.](https://en.wikipedia.org/wiki/Do_Not_Track)
+## - The `timeout` argument is on Seconds.
+## - OpenStreetMap API limits the length of all key and value strings to a maximum of 255 characters.
+## - Run the module itself for an Example.
+##
+## Support
+## -------
+##
+## All OpenStreetMap API is supported, but 2 API calls:
+## - https://wiki.openstreetmap.org/wiki/API_v0.6#Uploading_traces
+## - https://wiki.openstreetmap.org/wiki/API_v0.6#Redaction:_POST_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id.2F.23version.2Fredact.3Fredaction.3D.23redaction_id
 
 import asyncdispatch, httpclient, strformat, strutils, xmldomparser, xmldom, uri, httpcore, base64
 
@@ -28,10 +42,10 @@ type
   OSM* = OpenStreetMapBase[HttpClient]           ## OpenStreetMap  Sync Client.
   AsyncOSM* = OpenStreetMapBase[AsyncHttpClient] ## OpenStreetMap Async Client.
 
-
 proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body = ""): Future[PDocument] {.multisync.} =
   ## Base function for all OpenStreetMap HTTPS API Calls.
-  assert http_method in ["GET", "POST", "PUT", "DELETE"], "Invalid HTTP Method."
+  assert http_method in ["GET", "POST", "PUT", "DELETE"], "HTTP Method must be a string of one of 'GET' or 'POST' or 'PUT' or 'DELETE'."
+  assert endpoint.strip.len > 4, "Invalid OpenStreetMap HTTPS API Endpoint."
   assert body.len < max_str_len, err_msg_len
   var client =
     when this is AsyncOSM: newAsyncHttpClient()
@@ -202,23 +216,6 @@ proc get_trackpoints*(this: OSM | AsyncOSM, left, bottom, right, top: float, pag
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   result = await osm_http_request(this, endpoint=fmt"trackpoints?bbox={left},{bottom},{right},{top}&page={pageNumber}", http_method="GET")
 
-# FIXME
-# proc post_gpx_create*(this: OSM | AsyncOSM, description, tags, visibility, file: string): Future[PDocument] {.multisync.} =
-#   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Unsubscribe:_POST_.2Fapi.2F0.6.2Fchangeset.2F.23id.2Funsubscribe
-#   assert len(description) < max_str_len, "API limits length of all key & value strings to a maximum of 255 characters."
-#   assert len(tags) < max_str_len, "API limits length of all key & value strings to a maximum of 255 characters."
-#   assert visibility in ["private", "public", "trackable", "identifiable"], "OpenStreetMap Visibility must be private, public, trackable or identifiable."
-# #   It expects the following POST parameters in a multipart/form-data HTTP message:
-# #   file	The GPX file containing the track points. Note that for successful processing, the file must contain trackpoints (<trkpt>), not only waypoints, and the trackpoints must have a valid timestamp. Since the file is processed asynchronously, the call will complete successfully even if the file cannot be processed. The file may also be a .tar, .tar.gz or .zip containing multiple gpx files, although it will appear as a single entry in the upload log.
-# #   description	The trace description.
-# #   tags	A string containing tags for the trace.
-# #   public	1 if the trace is public, 0 if not. This exists for backwards compatibility only - the visibility parameter should now be used instead. This value will be ignored if visibility is also provided.
-# #   visibility	One of the following: private, public, trackable, identifiable (for explanations see OSM trace upload page or Visibility of GPS traces)
-#   let resp =
-#     when this is AsyncOSM: await this.client.post(api_url & "gpx/create")
-#     else: this.client.post(api_url & "gpx/create")
-#   result = loadXML(await resp.body)
-
 proc get_gpx_details*(this: OSM | AsyncOSM, id: int): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   result = await osm_http_request(this, endpoint=fmt"gpx/{id}/details", http_method="GET")
@@ -307,7 +304,6 @@ when is_main_module:
   echo $osm_client.get_trackpoints(90.0, -90.0, 90.0, -90.0, 1)
   echo $osm_client.get_notes(90.0, -90.0, 90.0, -90.0, limit=2)
   echo $osm_client.get_notes_search(q="Argentina", limit=2)
-
   # Async client.
   proc test {.async.} =
     let
