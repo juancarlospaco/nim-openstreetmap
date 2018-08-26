@@ -203,21 +203,21 @@ proc get_trackpoints*(this: OSM | AsyncOSM, left, bottom, right, top, pageNumber
   result = await osm_http_request(this, endpoint=fmt"trackpoints?bbox={left},{bottom},{right},{top}&page={pageNumber}", http_method="GET")
 
 # FIXME
-proc post_gpx_create*(this: OSM | AsyncOSM, description, tags, visibility, file: string): Future[PDocument] {.multisync.} =
-  ## https://wiki.openstreetmap.org/wiki/API_v0.6#Unsubscribe:_POST_.2Fapi.2F0.6.2Fchangeset.2F.23id.2Funsubscribe
-  assert len(description) < max_str_len, "API limits length of all key & value strings to a maximum of 255 characters."
-  assert len(tags) < max_str_len, "API limits length of all key & value strings to a maximum of 255 characters."
-  assert visibility in ["private", "public", "trackable", "identifiable"], "OpenStreetMap Visibility must be private, public, trackable or identifiable."
-#   It expects the following POST parameters in a multipart/form-data HTTP message:
-#   file	The GPX file containing the track points. Note that for successful processing, the file must contain trackpoints (<trkpt>), not only waypoints, and the trackpoints must have a valid timestamp. Since the file is processed asynchronously, the call will complete successfully even if the file cannot be processed. The file may also be a .tar, .tar.gz or .zip containing multiple gpx files, although it will appear as a single entry in the upload log.
-#   description	The trace description.
-#   tags	A string containing tags for the trace.
-#   public	1 if the trace is public, 0 if not. This exists for backwards compatibility only - the visibility parameter should now be used instead. This value will be ignored if visibility is also provided.
-#   visibility	One of the following: private, public, trackable, identifiable (for explanations see OSM trace upload page or Visibility of GPS traces)
-  let resp =
-    when this is AsyncOSM: await this.client.post(api_url & "gpx/create")
-    else: this.client.post(api_url & "gpx/create")
-  result = loadXML(await resp.body)
+# proc post_gpx_create*(this: OSM | AsyncOSM, description, tags, visibility, file: string): Future[PDocument] {.multisync.} =
+#   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Unsubscribe:_POST_.2Fapi.2F0.6.2Fchangeset.2F.23id.2Funsubscribe
+#   assert len(description) < max_str_len, "API limits length of all key & value strings to a maximum of 255 characters."
+#   assert len(tags) < max_str_len, "API limits length of all key & value strings to a maximum of 255 characters."
+#   assert visibility in ["private", "public", "trackable", "identifiable"], "OpenStreetMap Visibility must be private, public, trackable or identifiable."
+# #   It expects the following POST parameters in a multipart/form-data HTTP message:
+# #   file	The GPX file containing the track points. Note that for successful processing, the file must contain trackpoints (<trkpt>), not only waypoints, and the trackpoints must have a valid timestamp. Since the file is processed asynchronously, the call will complete successfully even if the file cannot be processed. The file may also be a .tar, .tar.gz or .zip containing multiple gpx files, although it will appear as a single entry in the upload log.
+# #   description	The trace description.
+# #   tags	A string containing tags for the trace.
+# #   public	1 if the trace is public, 0 if not. This exists for backwards compatibility only - the visibility parameter should now be used instead. This value will be ignored if visibility is also provided.
+# #   visibility	One of the following: private, public, trackable, identifiable (for explanations see OSM trace upload page or Visibility of GPS traces)
+#   let resp =
+#     when this is AsyncOSM: await this.client.post(api_url & "gpx/create")
+#     else: this.client.post(api_url & "gpx/create")
+#   result = loadXML(await resp.body)
 
 proc get_gpx_details*(this: OSM | AsyncOSM, id: int): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
