@@ -29,8 +29,8 @@ import asyncdispatch, httpclient, strformat, strutils, xmldomparser, xmldom, uri
 
 const
   osm_api_version* = 0.6                                          ## OpenStreetMap API Version.
-  api_url* = "https://api.openstreetmap.org/api/0.6/"             ## OpenStreetMap HTTPS API URL for Production.
-  api_dev* = "https://master.apis.dev.openstreetmap.org/api/0.6/" ## OpenStreetMap HTTPS API URL for Development.
+  osm_api_url* = "https://api.openstreetmap.org/api/0.6/"             ## OpenStreetMap HTTPS API URL for Production.
+  osm_api_dev* = "https://master.apis.dev.openstreetmap.org/api/0.6/" ## OpenStreetMap HTTPS API URL for Development.
   max_str_len = 255  ## API limits length of all key & value strings to a maximum of 255 characters.
   err_msg_len = "OpenStreetMap API limits the length of all key and value strings to a maximum of 255 characters."
   err_msg_ele = "OpenStreetMap API elements must be a string of one of 'node' or 'way' or 'relation'."
@@ -42,7 +42,7 @@ type
   OSM* = OpenStreetMapBase[HttpClient]           ## OpenStreetMap  Sync Client.
   AsyncOSM* = OpenStreetMapBase[AsyncHttpClient] ## OpenStreetMap Async Client.
 
-proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body = "", api_url=api_url): Future[PDocument] {.multisync.} =
+proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body = "", use_prod_server=true): Future[PDocument] {.multisync.} =
   ## Base function for all OpenStreetMap HTTPS API Calls.
   assert http_method in ["GET", "POST", "PUT", "DELETE"], "HTTP Method must be a string of one of 'GET' or 'POST' or 'PUT' or 'DELETE'."
   assert endpoint.strip.len > 4, "Invalid OpenStreetMap HTTPS API Endpoint."
@@ -50,12 +50,14 @@ proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body
   var client =
     when this is AsyncOSM: newAsyncHttpClient()
     else: newHttpClient(timeout = this.timeout * 1000)
-  let basic_auth = base64.encode(this.username.strip & ":" & this.password.strip)
+  let
+    basic_auth = base64.encode(this.username.strip & ":" & this.password.strip)
+    osm_apiurl = if use_prod_server: osm_api_url else: osm_api_dev
   client.headers["Authorization"] = "Basic " & basic_auth
   client.headers["DNT"] = "1"  # DoNotTrack.
   let responses =
-    when this is AsyncOSM: await client.request(url=api_url & endpoint, httpMethod=http_method, body=body)
-    else: client.request(url=api_url & endpoint, httpMethod=http_method, body=body)
+    when this is AsyncOSM: await client.request(url=osm_apiurl & endpoint, httpMethod=http_method, body=body)
+    else: client.request(url=osm_apiurl & endpoint, httpMethod=http_method, body=body)
   result = loadXML(await responses.body)
 
 
@@ -65,8 +67,8 @@ proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body
 proc get_capabilities*(this: OSM | AsyncOSM): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Capabilities:_GET_.2Fapi.2Fcapabilities
   let resp =
-    when this is AsyncOSM: await newAsyncHttpClient().get(api_url.replace("/0.6/", "") & "/capabilities")
-    else: newHttpClient().get(api_url.replace("/0.6/", "") & "/capabilities")
+    when this is AsyncOSM: await newAsyncHttpClient().get(api_url.replace("/0.6/", "/capabilities"))
+    else: newHttpClient().get(api_url.replace("/0.6/", "/capabilities"))
   result = loadXML(await resp.body)
 
 proc get_bounding_box*(this: OSM | AsyncOSM, left, bottom, right, top: float): Future[PDocument] {.multisync.} =
