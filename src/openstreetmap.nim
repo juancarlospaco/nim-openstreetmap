@@ -37,20 +37,23 @@ const
 
 type
   OpenStreetMapBase*[HttpType] = object
+    proxy*: Proxy
     timeout*: int8
-    username*, password*: string
     use_prod_server*: bool
+    username*, password*: string
   OSM* = OpenStreetMapBase[HttpClient]           ## OpenStreetMap  Sync Client.
   AsyncOSM* = OpenStreetMapBase[AsyncHttpClient] ## OpenStreetMap Async Client.
 
 proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body = ""): Future[PDocument] {.multisync.} =
-  ## Base function for all OpenStreetMap HTTPS API Calls.
+  ## Base function for all OpenStreetMap HTTPS GET/POST/PUT/DELETE API Calls.
   assert http_method in ["GET", "POST", "PUT", "DELETE"], "HTTP Method must be a string of one of 'GET' or 'POST' or 'PUT' or 'DELETE'."
   assert endpoint.strip.len > 4, "Invalid OpenStreetMap HTTPS API Endpoint."
   assert body.len < max_str_len, err_msg_len
   var client =
-    when this is AsyncOSM: newAsyncHttpClient()
-    else: newHttpClient(timeout = this.timeout * 1000)
+    when this is AsyncOSM: newAsyncHttpClient(
+      proxy = when declared(this.proxy): this.proxy else: nil)
+    else: newHttpClient(timeout = this.timeout * 1000,
+      proxy = when declared(this.proxy): this.proxy else: nil)
   let
     basic_auth = base64.encode(this.username.strip & ":" & this.password.strip)
     osm_apiurl = if this.use_prod_server: osm_api_url else: osm_api_dev
@@ -67,10 +70,10 @@ proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body
 
 proc get_capabilities*(this: OSM | AsyncOSM): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Capabilities:_GET_.2Fapi.2Fcapabilities
-  let resp =
+  let responses =
     when this is AsyncOSM: await newAsyncHttpClient().get(osm_api_url.replace("/0.6/", "/capabilities"))
     else: newHttpClient().get(osm_api_url.replace("/0.6/", "/capabilities"))
-  result = loadXML(await resp.body)
+  result = loadXML(await responses.body)
 
 proc get_bounding_box*(this: OSM | AsyncOSM, left, bottom, right, top: float): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Retrieving_map_data_by_bounding_box:_GET_.2Fapi.2F0.6.2Fmap
@@ -295,7 +298,7 @@ proc get_notes_search*(this: OSM | AsyncOSM, q: string, limit: range[1..10000] =
 
 when is_main_module:
   # Sync client.
-  let osm_client = OSM(timeout: 9, username: "test", password: "test")
+  let osm_client = OSM(timeout: 9, username: "test", password: "test", use_prod_server: true, proxy: nil)
   echo $osm_client.get_capabilities()
   echo $osm_client.get_bounding_box(90.0, -90.0, 90.0, -90.0)
   echo $osm_client.get_permissions()
@@ -310,7 +313,7 @@ when is_main_module:
   # Async client.
   proc test {.async.} =
     let
-      osm_client = AsyncOSM(timeout: 9, username: "test", password: "test")
+      osm_client = AsyncOSM(timeout: 9, username: "test", password: "test", use_prod_server: true, proxy: nil)
       async_resp = await osm_client.get_capabilities()
     echo $async_resp
 
