@@ -39,10 +39,11 @@ type
   OpenStreetMapBase*[HttpType] = object
     timeout*: int8
     username*, password*: string
+    use_prod_server*: bool
   OSM* = OpenStreetMapBase[HttpClient]           ## OpenStreetMap  Sync Client.
   AsyncOSM* = OpenStreetMapBase[AsyncHttpClient] ## OpenStreetMap Async Client.
 
-proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body = "", use_prod_server=true): Future[PDocument] {.multisync.} =
+proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body = ""): Future[PDocument] {.multisync.} =
   ## Base function for all OpenStreetMap HTTPS API Calls.
   assert http_method in ["GET", "POST", "PUT", "DELETE"], "HTTP Method must be a string of one of 'GET' or 'POST' or 'PUT' or 'DELETE'."
   assert endpoint.strip.len > 4, "Invalid OpenStreetMap HTTPS API Endpoint."
@@ -52,7 +53,7 @@ proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body
     else: newHttpClient(timeout = this.timeout * 1000)
   let
     basic_auth = base64.encode(this.username.strip & ":" & this.password.strip)
-    osm_apiurl = if use_prod_server: osm_api_url else: osm_api_dev
+    osm_apiurl = if this.use_prod_server: osm_api_url else: osm_api_dev
   client.headers["Authorization"] = "Basic " & basic_auth
   client.headers["DNT"] = "1"  # DoNotTrack.
   let responses =
@@ -67,8 +68,8 @@ proc osm_http_request(this: OSM | AsyncOSM, endpoint, http_method: string , body
 proc get_capabilities*(this: OSM | AsyncOSM): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Capabilities:_GET_.2Fapi.2Fcapabilities
   let resp =
-    when this is AsyncOSM: await newAsyncHttpClient().get(api_url.replace("/0.6/", "/capabilities"))
-    else: newHttpClient().get(api_url.replace("/0.6/", "/capabilities"))
+    when this is AsyncOSM: await newAsyncHttpClient().get(osm_api_url.replace("/0.6/", "/capabilities"))
+    else: newHttpClient().get(osm_api_url.replace("/0.6/", "/capabilities"))
   result = loadXML(await resp.body)
 
 proc get_bounding_box*(this: OSM | AsyncOSM, left, bottom, right, top: float): Future[PDocument] {.multisync.} =
