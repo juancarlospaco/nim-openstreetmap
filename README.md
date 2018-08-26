@@ -56,6 +56,7 @@ waitFor(test())
 - API Calls that use HTTP `DELETE` start with `delete_*`.
 - API Calls use [the DoNotTrack HTTP Header.](https://en.wikipedia.org/wiki/Do_Not_Track)
 - The `timeout` argument is on Seconds.
+- OpenStreetMap API limits the length of all key and value strings to a maximum of 255 characters.
 - Run the module itself for an Example.
 
 
