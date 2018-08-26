@@ -16,7 +16,7 @@
 import openstreetmap
 
 # Sync client.
-let osm_client = OSM(timeout: 9, username: "username", password: "password")
+let osm_client = OSM(timeout: 9, username: "user", password: "pass", use_prod_server: true, proxy: nil)
 echo $osm_client.get_capabilities()
 echo $osm_client.get_bounding_box(90.0, -90.0, 90.0, -90.0)
 echo $osm_client.get_permissions()
@@ -32,7 +32,7 @@ echo $osm_client.get_notes_search(q="Argentina", limit=2)
 # Async client.
 proc test {.async.} =
   let
-    osm_client = AsyncOSM(timeout: 9, username: "username", password: "password")
+    osm_client = AsyncOSM(timeout: 9, username: "user", password: "pass", use_prod_server: true, proxy: nil)
     async_resp = await osm_client.get_capabilities()
   echo $async_resp
 
@@ -58,6 +58,7 @@ waitFor(test())
 - API Calls use [the DoNotTrack HTTP Header.](https://en.wikipedia.org/wiki/Do_Not_Track)
 - The `timeout` argument is on Seconds.
 - OpenStreetMap API limits the length of all key and value strings to a maximum of 255 characters.
+- For Proxy support define a `OSM.proxy` or `AsyncOSM.proxy` of `Proxy` type.
 - Run the module itself for an Example.
 
 
@@ -109,7 +110,10 @@ Yes. [**You MUST give Credit to OpenStreetMap Contributors!.**](https://wiki.ope
 
 - Can I use a Sandbox fake server for testing purposes ?.
 
-Yes. Its on the `api_dev` const on the source code.
+Yes.
+Set `OSM.use_prod_server` or `AsyncOSM.use_prod_server` of `bool` type,
+`true` to use `"https://api.openstreetmap.org/api/0.6/"`,
+`false` to use `"https://master.apis.dev.openstreetmap.org/api/0.6/"`.
 
 
 # Requisites
