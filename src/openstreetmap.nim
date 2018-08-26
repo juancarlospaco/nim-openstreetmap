@@ -14,17 +14,17 @@
 import asyncdispatch, httpclient, strformat, strutils, xmldomparser, xmldom, uri, httpcore, base64
 
 const
-  osm_api_semver* = 0.6  ## OpenStreetMap API Version.
+  osm_api_semver* = 0.6                                           ## OpenStreetMap API Version.
   api_url* = "https://api.openstreetmap.org/api/0.6/"             ## OpenStreetMap HTTPS API URL for Production.
   api_dev* = "https://master.apis.dev.openstreetmap.org/api/0.6/" ## OpenStreetMap HTTPS API URL for Development.
   max_str_len = 255  ## API limits length of all key & value strings to a maximum of 255 characters.
   err_msg_len = "OpenStreetMap API limits the length of all key and value strings to a maximum of 255 characters."
-  err_msg_ele = "OpenStreetMap API elements must be one of 'node' or 'way' or 'relation'."
+  err_msg_ele = "OpenStreetMap API elements must be a string of one of 'node' or 'way' or 'relation'."
 
 type
   OpenStreetMapBase*[HttpType] = object
     timeout*: int8
-    username, password: string
+    username*, password*: string
   OSM* = OpenStreetMapBase[HttpClient]           ## OpenStreetMap  Sync Client.
   AsyncOSM* = OpenStreetMapBase[AsyncHttpClient] ## OpenStreetMap Async Client.
 
@@ -295,10 +295,13 @@ proc get_notes_search*(this: OSM | AsyncOSM, q: string, limit: range[1..10000] =
 
 when is_main_module:
   # Sync client.
-  var osm_client = OSM(timeout: 9, username: "test", password: "test")
+  #var osm_client = OSM(timeout: 9, username: "test", password: "test")
   #echo $osm_client.get_capabilities()
   #echo $osm_client.get_bounding_box(90.0, -90.0, 90.0, -90.0)
   #echo $osm_client.get_permissions()
   #echo $osm_client.get_changeset(61972594)
-  # echo $osm_client.put_changeset_close(61972594)  # Fails as expected.
-  echo $osm_client.get_changeset_download(61972594)
+  #echo $osm_client.put_changeset_close(61972594)  # Fails as expected.
+  #echo $osm_client.get_changeset_download(61972594)
+  # Async client.
+  var aosm_client = AsyncOSM(timeout: 9, username: "test", password: "test")
+  echo $aosm_client.get_capabilities()
