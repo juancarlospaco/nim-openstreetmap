@@ -81,7 +81,7 @@ proc get_permissions*(this: OSM | AsyncOSM): Future[PDocument] {.multisync.} =
 # API Calls -> ChangeSets.
 
 
-proc put_changeset_create(this: OSM | AsyncOSM, payload: PDocument): Future[PDocument] {.multisync.} =
+proc put_changeset_create*(this: OSM | AsyncOSM, payload: PDocument): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Create:_PUT_.2Fapi.2F0.6.2Fchangeset.2Fcreate
   result = await osm_http_request(this, endpoint="changeset/create", http_method="PUT", body = $payload)
 
@@ -89,11 +89,11 @@ proc get_changeset*(this: OSM | AsyncOSM, id: int, include_discussion = true): F
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2Fchangeset.2F.23id.3Finclude_discussion.3Dtrue
   result = await osm_http_request(this, endpoint=fmt"changeset/{id}?include_discussion={include_discussion}", http_method="GET")
 
-proc put_changeset(this: OSM | AsyncOSM, id: int, payload: PDocument): Future[PDocument] {.multisync.} =
+proc put_changeset*(this: OSM | AsyncOSM, id: int, payload: PDocument): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Update:_PUT_.2Fapi.2F0.6.2Fchangeset.2F.23id
   result = await osm_http_request(this, endpoint=fmt"changeset/{id}", http_method="PUT", body = $payload)
 
-proc put_changeset_close(this: OSM | AsyncOSM, id: int): Future[PDocument] {.multisync.} =
+proc put_changeset_close*(this: OSM | AsyncOSM, id: int): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Close:_PUT_.2Fapi.2F0.6.2Fchangeset.2F.23id.2Fclose
   result = await osm_http_request(this, endpoint=fmt"changeset/{id}/close", http_method="PUT")
 
@@ -158,7 +158,7 @@ proc post_changeset_unsubscribe*(this: OSM | AsyncOSM, id: int): Future[PDocumen
 # API Calls -> Elements.
 
 
-proc put_nodewayrelation_create(this: OSM | AsyncOSM, element: string, payload: PDocument): Future[PDocument] {.multisync.} =
+proc put_nodewayrelation_create*(this: OSM | AsyncOSM, element: string, payload: PDocument): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Create:_PUT_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2Fcreate
   assert element in ["node", "way", "relation"], err_msg_ele
   result = await osm_http_request(this, endpoint=fmt"{element}/create", http_method="PUT", body = $payload)
@@ -168,12 +168,12 @@ proc get_nodewayrelation*(this: OSM | AsyncOSM, element: string, id: int): Futur
   assert element in ["node", "way", "relation"], err_msg_ele
   result = await osm_http_request(this, endpoint=fmt"{element}/{id}", http_method="GET")
 
-proc put_nodewayrelation_update(this: OSM | AsyncOSM, element: string, id: int, payload: PDocument): Future[PDocument] {.multisync.} =
+proc put_nodewayrelation_update*(this: OSM | AsyncOSM, element: string, id: int, payload: PDocument): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Update:_PUT_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   assert element in ["node", "way", "relation"], err_msg_ele
   result = await osm_http_request(this, endpoint=fmt"{element}/{id}", http_method="PUT", body = $payload)
 
-proc delete_nodewayrelation(this: OSM | AsyncOSM, element: string, id: int): Future[PDocument] {.multisync.} =
+proc delete_nodewayrelation*(this: OSM | AsyncOSM, element: string, id: int): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Delete:_DELETE_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   assert element in ["node", "way", "relation"], err_msg_ele
   result = await osm_http_request(this, endpoint=fmt"{element}/{id}", http_method="DELETE")
