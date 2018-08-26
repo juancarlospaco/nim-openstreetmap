@@ -119,7 +119,7 @@ proc get_changesets_display_name*(this: OSM | AsyncOSM, display_name: string): F
 
 proc get_changesets_time*(this: OSM | AsyncOSM, time1, time2: string): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Query:_GET_.2Fapi.2F0.6.2Fchangesets
-  assert time1 != "", "At least 1 time string must be provided!."
+  assert time1 != "", "OpenStreetMap API requires that at least 1 time string must be provided!."
   let t2 = if time2 == "": "" else: "," & time2
   result = await osm_http_request(this, endpoint=fmt"changesets?time={time1}{t2}", http_method="GET")
 
@@ -212,7 +212,7 @@ proc get_wayrelation_full*(this: OSM | AsyncOSM, element: string, id: int): Futu
 # API Calls -> GPS Traces.
 
 
-proc get_trackpoints*(this: OSM | AsyncOSM, left, bottom, right, top: float, pageNumber: int): Future[PDocument] {.multisync.} =
+proc get_trackpoints*(this: OSM | AsyncOSM, left, bottom, right, top: float, pageNumber: int8): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
   result = await osm_http_request(this, endpoint=fmt"trackpoints?bbox={left},{bottom},{right},{top}&page={pageNumber}", http_method="GET")
 
@@ -251,7 +251,7 @@ proc get_user_preferences*(this: OSM | AsyncOSM): Future[PDocument] {.multisync.
 
 proc put_user_preferences*(this: OSM | AsyncOSM, your_key, value: string): Future[PDocument] {.multisync.} =
   ## https://wiki.openstreetmap.org/wiki/API_v0.6#Read:_GET_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id
-  result = await osm_http_request(this, endpoint=fmt"user/preferences/{your_key}", http_method="PUT", body = value)
+  result = await osm_http_request(this, endpoint=fmt"user/preferences/{your_key}", http_method="PUT", body = value.strip)
 
 
 # API Calls -> Map Notes.
