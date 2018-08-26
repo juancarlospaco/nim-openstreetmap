@@ -14,9 +14,30 @@
 
 ```nim
 import openstreetmap
-let osm_client = OSM(timeout: 9, username: "user", password: "pass")
-echo $osm_client.get_capabilities() # Check the Docs for more API Calls.
-echo $osm_client.get_notes_search(q="Argentina", limit=9)
+
+# Sync client.
+let osm_client = OSM(timeout: 9, username: "username", password: "password")
+echo $osm_client.get_capabilities()
+echo $osm_client.get_bounding_box(90.0, -90.0, 90.0, -90.0)
+echo $osm_client.get_permissions()
+echo $osm_client.get_changeset(61972594)
+echo $osm_client.get_changeset_download(61972594)
+echo $osm_client.get_changesets_bbox(90.0, -90.0, 90.0, -90.0)
+echo $osm_client.get_changesets_open(true)
+echo $osm_client.get_changesets_cid(@[61972594])
+echo $osm_client.get_trackpoints(90.0, -90.0, 90.0, -90.0, 1)
+echo $osm_client.get_notes(90.0, -90.0, 90.0, -90.0, limit=2)
+echo $osm_client.get_notes_search(q="Argentina", limit=2)
+
+# Async client.
+proc test {.async.} =
+  let
+    osm_client = AsyncOSM(timeout: 9, username: "username", password: "password")
+    async_resp = await osm_client.get_capabilities()
+  echo $async_resp
+
+waitFor(test())
+# Check the Docs for more API Calls...
 ```
 
 
@@ -29,6 +50,10 @@ echo $osm_client.get_notes_search(q="Argentina", limit=9)
 - The order of the procs follows the order on the OSM Wiki.
 - The naming of the procs follows the naming on the OSM Wiki.
 - The errors on the procs follows the errors on the OSM Wiki.
+- API Calls that use HTTP `GET` start with `get_*`.
+- API Calls that use HTTP `POST` start with `post_*`.
+- API Calls that use HTTP `PUT` start with `put_*`.
+- API Calls that use HTTP `DELETE` start with `delete_*`.
 - Run the module itself for an Example.
 
 
