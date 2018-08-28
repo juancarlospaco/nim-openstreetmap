@@ -68,7 +68,7 @@ waitFor(test())
 All OpenStreetMap API is supported, except 2 API calls:
 
 - https://wiki.openstreetmap.org/wiki/API_v0.6#Uploading_traces
-- https://wiki.openstreetmap.org/wiki/API_v0.6#Redaction:_POST_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id.2F.23version.2Fredact.3Fredaction.3D.23redaction_id
+- [Some weird endpoint for OSM admins-only.](https://wiki.openstreetmap.org/wiki/API_v0.6#Redaction:_POST_.2Fapi.2F0.6.2F.5Bnode.7Cway.7Crelation.5D.2F.23id.2F.23version.2Fredact.3Fredaction.3D.23redaction_id)
 
 
 # FAQ
