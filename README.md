@@ -40,6 +40,8 @@ waitFor(test())
 # Check the Docs for more API Calls...
 ```
 
+**You are Writing the Map for Real with this Lib!, double check what you are doing!.**
+
 
 # API
 
