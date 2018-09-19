@@ -46,7 +46,6 @@ type
 
 proc osm_http_request(this: OSM | AsyncOSM, endpoint: string, http_method: HttpMethod, body = ""): Future[PDocument] {.multisync.} =
   ## Base function for all OpenStreetMap HTTPS GET/POST/PUT/DELETE API Calls.
-  assert contains([HttpGet, HttpPost, HttpPut, HttpDelete], http_method), "HTTP Method must be a HttpMethod of one of HttpGet, HttpPost, HttpPut, or HttpDelete."
   assert endpoint.strip.len > 4, "Invalid OpenStreetMap HTTPS API Endpoint."
   assert body.len < max_str_len, err_msg_len
   var client =
